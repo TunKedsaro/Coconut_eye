@@ -139,3 +139,85 @@ with open(le,"rb") as f:
 embeddings = np.array(data['embeddings'])
 labels = le.fit_transform(data['names'])         # แทนชื่อคนด้วยตัวเลข
 print(labels)
+
+def fn(img_path, cosine_threshold = 0.95, proba_threshold = 0.85, comparing_num = 5):
+    # input -> RGB
+    img = cv2.imread(img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Rescale size with factor
+    h,w = img.shape[:2]
+    Fct = 1000/h
+    Nh  = int(h*Fct)
+    Nw  = int(w*Fct)
+    img = cv2.resize(img, (Nw,Nh))
+    # Face detection
+    detector = MTCNN()
+    bboxes   = detector.detect_faces(img)
+    # # Original img
+    # plt.figure(figsize=(10,7))
+    # plt.imshow(img)
+    # plt.show()
+    try:
+        # Switching
+        if len(bboxes) == 0:
+            text = "0"
+        elif len(bboxes) > 0:
+            if len(bboxes) == 1:              # case I  : Single face
+                biggest_face = bboxes[0]
+            elif len(bboxes) > 1:             # case II : multiple face
+                max_area = 0
+                for face in bboxes:
+                    x, y, width, height = face['box']
+                    area = width*height
+                    if area > max_area:
+                        max_area = area
+                        biggest_face = face
+            # print(biggest_face)
+            bbox = biggest_face['box']
+            bbox = np.array([bbox[0],bbox[1],bbox[0]+bbox[2],bbox[1]+bbox[3]])
+            landmarks = biggest_face['keypoints']
+            landmarks = np.array([landmarks["left_eye"][0],landmarks["right_eye"][0],landmarks["nose"][0],landmarks["mouth_left"][0],landmarks["mouth_right"][0],landmarks["left_eye"][1],landmarks["right_eye"][1],landmarks["nose"][1],landmarks["mouth_left"][1],landmarks["mouth_right"][1]])
+            landmarks = landmarks.reshape((2,5)).T
+
+            nimg = preprocessor.preprocess(img,bbox,landmarks)                      # ได้หน้าของแต่ละคน
+            # plt.imshow(nimg)
+            # plt.show()
+
+            prep_img = face_model.preprocess_image(nimg)
+            embedding = face_model.get_embedding(prep_img).reshape(1,-1)
+            # Class predictive
+            text = "?"
+            preds = model.predict(embedding)                                        # [[9.9969018e-01 3.0968967e-04 1.1600605e-07]]
+            preds = preds.flatten()                                                 # [9.9969018e-01 3.0968967e-04 1.1600605e-07]
+            j = np.argmax(preds)                                                            # 0,1,2 class ที่มากสุด
+            proba = preds[j]                                                                # เอาเปอร์เซ้นของตัวที่มากที่สุดมา
+            # similarity
+            match_class_idx = np.where(labels == j)[0]
+            selected_idx = np.random.choice(match_class_idx, 20)
+            # selected_idx
+            compare_embeddings = embeddings[selected_idx]
+            # compare_embeddings
+            cos_similarity = CosineSimilarity(embedding, compare_embeddings)
+            print("if cos_similarity < cosine_threshold and proba > proba_threshold:")
+            print(f"if {cos_similarity} < {cosine_threshold} and {proba} > {proba_threshold}:")
+            # if cos_similarity < cosine_threshold and proba > proba_threshold:
+            if cos_similarity < cosine_threshold:
+                name = le.classes_[j]
+                text = f"{name}"
+                print(f"Recognized: {name} <{proba*100:.2f}>")
+            # y = bbox[1] - 10 if bbox[1] - 10 > 10 else bbox[1] + 10
+            # cv2.putText(img, text, (bbox[0], y), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1)
+            # cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255,0,0), 2)
+            # # break
+            # plt.figure(figsize=(15,10))
+            # plt.imshow(img)
+            # plt.show()
+
+    except:
+        text = "Something Error"
+    return img_path.split("/")[-1], text, img.shape, len(bboxes)
+
+# fn("/content/drive/MyDrive/coconut/Face_recognition_project/Test_dataset/SC651Ice/225.png")
+
+# img_name, predict_name, img_shape, len_boxes = fn(r"C:\Users\Acer\Desktop\FaceRecAPI\test_images\001.png")
+# img_name, predict_name, img_shape, len_boxes
