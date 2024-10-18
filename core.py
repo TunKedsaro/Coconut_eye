@@ -140,9 +140,9 @@ embeddings = np.array(data['embeddings'])
 labels = le.fit_transform(data['names'])         # แทนชื่อคนด้วยตัวเลข
 print(labels)
 
-def fn(img_path, cosine_threshold = 0.95, proba_threshold = 0.85, comparing_num = 5):
+def fn(img, cosine_threshold = 0.95, proba_threshold = 0.85, comparing_num = 5):
     # input -> RGB
-    img = cv2.imread(img_path)
+    # img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     # Rescale size with factor
     h,w = img.shape[:2]
@@ -215,9 +215,14 @@ def fn(img_path, cosine_threshold = 0.95, proba_threshold = 0.85, comparing_num 
 
     except:
         text = "Something Error"
-    return img_path.split("/")[-1], text, img.shape, len(bboxes)
+    return  text, img.shape, len(bboxes)
 
 # fn("/content/drive/MyDrive/coconut/Face_recognition_project/Test_dataset/SC651Ice/225.png")
 
 # img_name, predict_name, img_shape, len_boxes = fn(r"C:\Users\Acer\Desktop\FaceRecAPI\test_images\001.png")
 # img_name, predict_name, img_shape, len_boxes
+
+
+
+def test():
+    print("Yep")
