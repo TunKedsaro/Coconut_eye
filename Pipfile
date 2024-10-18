@@ -12,6 +12,7 @@ mtcnn = "*"
 tensorflow = "*"
 matplotlib = "*"
 scikit-image = "*"
+scikit-learn = "*"
 
 [dev-packages]
 
