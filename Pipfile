@@ -7,6 +7,11 @@ name = "pypi"
 fastapi = "*"
 python-multipart = "*"
 opencv-python = "*"
+onnxruntime = "*"
+mtcnn = "*"
+tensorflow = "*"
+matplotlib = "*"
+scikit-image = "*"
 
 [dev-packages]
 
