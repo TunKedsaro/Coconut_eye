@@ -24,9 +24,9 @@ for obj in response.get("Contents",[]):
     print(obj)
     print(obj['Key'])
     files.append(obj['Key'])
-print(files)
+# print(files)
 
-
+## Outputs
 # {
 #     'Key': 'w600k_r50.onnx',
 #     'LastModified': datetime.datetime(2024, 11, 21, 2, 21, 56, tzinfo=tzutc()),
@@ -34,7 +34,15 @@ print(files)
 #     'Size': 174383860,
 #     'StorageClass': 'STANDARD'
 # }
-
-
+print("#"*100)
+for file_name in files:
+    print(f"Processing file: {file_name}")
+    response = s3.get_object(
+        Bucket = bucket_name,
+        Key = file_name
+    )
+    file_data = response['Body'].read()
+    # print(file_data)
+    
 
 

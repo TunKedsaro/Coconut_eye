@@ -9,6 +9,9 @@ pillow = "*"
 awscli = "*"
 opencv-python = "*"
 numpy = "*"
+matplotlib = "*"
+scikit-learn = "*"
+tensorflow = "*"
 
 [dev-packages]
 
