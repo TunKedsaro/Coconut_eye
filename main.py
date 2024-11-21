@@ -8,13 +8,12 @@ print("Import done!!!")
 # Connect S3 with key (Got it's from ...)
 s3 = boto3.client(
     "s3",
-    region_name = aws_keys.AWS_DEFAULT_REGION,
-    aws_access_key_id = aws_keys.AWS_ACCESS_KEY_ID,
+    region_name           = aws_keys.AWS_DEFAULT_REGION,
+    aws_access_key_id     = aws_keys.AWS_ACCESS_KEY_ID,
     aws_secret_access_key = aws_keys.AWS_SECRET_ACCESS_KEY
     )
 bucket_name = "model-test-211124-0920"
 image_key   = "ComfyUI_00016_.png"
-
 
 # list all file in bucket
 response = s3.list_objects_v2(

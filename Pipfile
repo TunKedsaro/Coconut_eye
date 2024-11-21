@@ -7,6 +7,8 @@ name = "pypi"
 boto3 = "*"
 pillow = "*"
 awscli = "*"
+opencv-python = "*"
+numpy = "*"
 
 [dev-packages]
 
