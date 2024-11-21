@@ -40,3 +40,5 @@ outputs = session.run(
     None,{inputs[0].name:img}
 )
 print(outputs)
+
+
