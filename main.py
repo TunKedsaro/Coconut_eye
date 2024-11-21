@@ -1,98 +1,38 @@
-# #upload/main.py
-# from fastapi import FastAPI, File, UploadFile
-# from fastapi.responses import FileResponse
-# import os
-# from random import randint
-# import uuid
+import boto3
+from PIL import Image
+from io import BytesIO
+import aws_keys
 
-# IMAGEDIR = "images/"
+print("Import done!!!")
 
-# app = FastAPI()
-
-# @app.post("/upload/")
-# async def create_upload_file(file: UploadFile = File(...)):
-#     file.filename = f"{uuid.uuid4()}.jpg"
-#     contents = await file.read()
-#     #save the file
-#     with open(f"{IMAGEDIR}{file.filename}", "wb") as f:
-#         f.write(contents)
-#     return {"filename": file.filename}
-
-# @app.get("/show/")
-# async def read_random_file():
- 
-#     # get random file from the image directory
-#     files = os.listdir(IMAGEDIR)
-#     random_index = randint(0, len(files) - 1)
- 
-#     path = f"{IMAGEDIR}{files[random_index]}"
-     
-#     return FileResponse(path)
+# Connect S3 with key (Got it's from ...)
+s3 = boto3.client(
+    "s3",
+    region_name = aws_keys.AWS_DEFAULT_REGION,
+    aws_access_key_id = aws_keys.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key = aws_keys.AWS_SECRET_ACCESS_KEY
+    )
+bucket_name = "model-test-211124-0920"
+image_key   = "ComfyUI_00016_.png"
 
 
+# list all file in bucket
+response = s3.list_objects_v2(
+    Bucket = bucket_name
+)
+if 'Contents' in response:
+    for obj in response['Contents']:
+        print(obj['Key'])
+else:
+    print("No file in your bucket Kub 555 -_-")
 
-#############################################################################
-# from fastapi import FastAPI, File, UploadFile
-# from fastapi.responses import FileResponse
-# import os
-# from random import randint
-# import uuid
-# import cv2
-# import numpy as np
 
-# IMAGEDIR = "images/"
-
-# app = FastAPI()
-
-# @app.post("/upload/")
-# async def create_upload_file(
-#     file : UploadFile = File(...)
-# ):
-#     # input image
-#     contents = await file.read()
-#     nparr = np.frombuffer(contents, np.uint8)
-#     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-#     img_shape = image.shape
-#     # save name
-#     processed_filename = f"{uuid.uuid4()}.jpg"
-#     processed_image_path = f"{IMAGEDIR}{processed_filename}"
-#     # result
-#     cv2.imwrite(processed_image_path, image)
-#     results = {
-#         "processed_filename" : processed_filename,
-#         "shape" : img_shape
-#     }
-#     return {"message": results}
-
-#############################################################################
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import FileResponse
-import os
-from random import randint
-import uuid
-import cv2
-import numpy as np
-
-IMAGEDIR = "images/"
-
-app = FastAPI()
-
-@app.post("/upload/")
-async def create_upload_file(
-    file : UploadFile = File(...)
-):
-    # input image
-    contents = await file.read()
-    nparr = np.frombuffer(contents, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    img_shape = image.shape
-    # save name
-    processed_filename = f"{uuid.uuid4()}.jpg"
-    processed_image_path = f"{IMAGEDIR}{processed_filename}"
-    # result
-    cv2.imwrite(processed_image_path, image)
-    results = {
-        "processed_filename" : processed_filename,
-        "shape" : img_shape
-    }
-    return results
+# Get image -> show it
+response = s3.get_object(
+    Bucket = bucket_name,
+    Key = image_key
+)
+# Read and display the image
+image_data = response['Body'].read()
+image = Image.open(BytesIO(image_data))
+image.show()
